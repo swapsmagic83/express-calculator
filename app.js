@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+const ExpressError = require('./expressError')
+
 app.use(express.json());
 
 
@@ -13,26 +15,30 @@ function mean(arr){
     return mean
 }
 
-app.get('/mean',(req,res)=>{
-    console.log(req.query['nums'])
-    if(!req.query.nums){
-        return res.status(400).send('nums are required');
-    }
-    let stringArr = req.query['nums'].split(',')
-    let arr =[]
-
-        for(let i=0; i<stringArr.length; i++) {
-        
-            if(isNaN(stringArr[i])) {
-                return res.status(404).send(`${stringArr[i]} is not a number`);
-            }else{
-                arr.push(Number(stringArr[i]))
-            }
-            console.log(arr)
+app.get('/mean',(req,res,next)=>{
+    try{
+        if(!req.query.nums){
+            throw new ExpressError('nums are required',400)
         }
+        let stringArr = req.query['nums'].split(',')
+        let arr =[]
     
-    let result ={operation : "Mean", value : mean(arr)}
-    return res.status(200).send(result)
+            for(let i=0; i<stringArr.length; i++) {
+            
+                if(isNaN(stringArr[i])) {
+                    throw new ExpressError(`${stringArr[i]} is not a number`,400)
+                }else{
+                    arr.push(Number(stringArr[i]))
+                }
+                console.log(arr)
+            }
+        
+        let result ={operation : "Mean", value : mean(arr)}
+        return res.status(200).send(result)
+    }
+    catch(e){
+        return next(e)
+    }
 })
 
 function median(arr){
@@ -48,23 +54,28 @@ function median(arr){
     }
 }
 
-app.get('/median',(req,res)=>{
-    if(!req.query.nums){
-        return res.status(400).send('nums are required');
-    }
-    let stringArr = req.query['nums'].split(',');
-    let arr =[]
-
-        for(let i=0; i<stringArr.length; i++) {
-        
-            if(isNaN(stringArr[i])) {
-                return res.status(404).send(`${stringArr[i]} is not a number`);
-            }else{
-                arr.push(Number(stringArr[i]))
-            }
+app.get('/median',(req,res,next)=>{
+    try{
+        if(!req.query.nums){
+            throw new ExpressError('nums are required',400)
         }
-    let result ={operation : "median", value : median(arr)}
-    res.status(200).json(result)
+        let stringArr = req.query['nums'].split(',');
+        let arr =[]
+    
+            for(let i=0; i<stringArr.length; i++) {
+            
+                if(isNaN(stringArr[i])) {
+                    throw new ExpressError(`${stringArr[i]} is not a number`,400)
+                }else{
+                    arr.push(Number(stringArr[i]))
+                }
+            }
+        let result ={operation : "median", value : median(arr)}
+        res.status(200).json(result) 
+    }
+    catch(e){
+        return next(e)
+    }
 })
 
 function mode(arr){
@@ -89,25 +100,33 @@ function mode(arr){
 
 }
 
-app.get('/mode',(req,res)=>{
-    if(!req.query.nums){
-        return res.status(400).send('nums are required');
-    }
-    let stringArr = req.query['nums'].split(',');
-    let arr =[]
-
-        for(let i=0; i<stringArr.length; i++) {
-        
-            if(isNaN(stringArr[i])) {
-                return res.status(404).send(`${stringArr[i]} is not a number`);
-            }else{
-                arr.push(Number(stringArr[i]))
-            }
+app.get('/mode',(req,res,next)=>{
+    try{
+        if(!req.query.nums){
+            throw new ExpressError('nums are required',400)
         }
-    let result ={operation : "mode", value : mode(arr)}
-    res.status(200).json(result)
+        let stringArr = req.query['nums'].split(',');
+        let arr =[]
+    
+            for(let i=0; i<stringArr.length; i++) {
+            
+                if(isNaN(stringArr[i])) {
+                    throw new ExpressError(`${stringArr[i]} is not a number`,400)
+                }else{
+                    arr.push(Number(stringArr[i]))
+                }
+            }
+        let result ={operation : "mode", value : mode(arr)}
+        res.status(200).json(result)
+    }
+    catch(e){
+        return next(e)
+    }
 })
 
+app.use((error,req,res,next)=>{
+    return res.status(error.status).send(error.message);
+})
 
 app.listen(3000, ()=> {
     console.log('Server started on port 3000.');
